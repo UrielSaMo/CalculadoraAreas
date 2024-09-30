@@ -254,17 +254,49 @@ namespace CalculadoraAreas
 
         private void buttonActualizar_Click(object sender, EventArgs e)
         {
-            string panel = "Panel de actualizacion";
-            string ruta = Application.StartupPath;
+            string repoUrl = "https://github.com/UrielSaMo/Panel-de-actualizacion.git";
+            string localPath = Path.Combine(Application.StartupPath, "Panel-de-actualizacion");
+            string executableFileName = "Panel de actualizacion.exe";
+            string sourceExecutablePath = Path.Combine(localPath, executableFileName);
+            string destinationExecutablePath = Path.Combine(Application.StartupPath, executableFileName);
+           
+            // Comando git para clonar el repositorio
+            string gitCommand = $"git clone {repoUrl} \"{localPath}\"";
 
             try
             {
-                string rutaDelEjecutable = Path.Combine(ruta, panel);
-                Process.Start(rutaDelEjecutable);
+                // Crear y configurar el proceso
+                var process = new System.Diagnostics.Process();
+                process.StartInfo.FileName = "cmd.exe";
+                process.StartInfo.Arguments = $"/C {gitCommand}";
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.CreateNoWindow = true;
+
+                // Iniciar el proceso
+                process.Start();
+
+                // Esperar a que termine
+                process.WaitForExit();
+
+                // Iniciar el ejecutable si es necesario
+                if (File.Exists(sourceExecutablePath))
+                {
+                    // Copiar el archivo a la ruta del programa
+                    File.Copy(sourceExecutablePath, destinationExecutablePath, true); // El segundo parámetro indica si se debe sobrescribir
+
+                    // Iniciar el ejecutable
+                    Process.Start(destinationExecutablePath);
+                }
+                else
+                {
+                    MessageBox.Show("El archivo 'Panel de actualizacion.exe' no se encontró en el repositorio clonado.");
+                }
+                
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al intentar abrir el archivo: {ex.Message}");
+                MessageBox.Show($"Error al intentar clonar el repositorio: {ex.Message}");
             }
         }
     }
